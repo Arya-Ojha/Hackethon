@@ -23,17 +23,17 @@ function initDarkMode() {
 
 // Configuration
 const ANOMALY_THRESHOLDS = {
-	FALL_VELOCITY: -0.5, // Increased negative threshold for falling
-	FALL_DURATION: 500, // Minimum duration of fall in milliseconds
-	FALL_CONFIRMATION_FRAMES: 5, // Number of frames to confirm a fall
-	FIGHT_DISTANCE: 100, // Pixels between people (close = potential fight)
+	FALL_VELOCITY: -0.25,
+	FALL_DURATION: 500,
+	FALL_CONFIRMATION_FRAMES: 5,
+	FIGHT_DISTANCE: 100,
 };
 
 const DETECTION_CONFIG = {
-	MIN_CONFIDENCE: 0.3, // Minimum confidence score to show detection
-	MAX_OBJECTS: 20, // Increased maximum objects to detect
-	MIN_SCORE: 0.3, // Minimum score threshold
-	IOU_THRESHOLD: 0.5, // Intersection over Union threshold for NMS
+	MIN_CONFIDENCE: 0.4,
+	MAX_OBJECTS: 15,
+	MIN_SCORE: 0.4,
+	IOU_THRESHOLD: 0.45,
 };
 
 // Add these constants at the top of the file
@@ -75,16 +75,14 @@ async function init() {
 		console.log("Loading pose detection model...");
 		const model = poseDetection.SupportedModels.MoveNet;
 		poseDetector = await poseDetection.createDetector(model, {
-			modelType: "SinglePose.Lightning", // Changed back to Lightning for better compatibility
+			modelType: "SinglePose.Lightning",
 			enableSmoothing: true,
 			minPoseScore: 0.3,
 		});
 		console.log("Pose detection model loaded");
 
 		console.log("Loading object detection model...");
-		objectDetector = await cocoSsd.load({
-			base: "lite_mobilenet_v2", // Changed back to lite version for better compatibility
-		});
+		objectDetector = await cocoSsd.load({ base: "lite_mobilenet_v2" });
 		console.log("Object detection model loaded");
 
 		// Setup button event listeners
@@ -609,7 +607,6 @@ async function detectPosesAndObjects() {
 		}
 	} catch (error) {
 		console.error("Detection error:", error);
-		// Only continue if we're still detecting
 		if (isDetecting) {
 			detectionLoop = requestAnimationFrame(detectPosesAndObjects);
 		}
@@ -661,48 +658,54 @@ function calculateIoU(box1, box2) {
 	return intersectionArea / unionArea;
 }
 
-// --- Anomaly Detection Logic ---
+// Update the alert display function
+function showAlert(message) {
+	console.log("Alert triggered:", message); // Debug log
+	alertBox.textContent = message;
+	alertBox.style.display = "block";
+	alertBox.style.backgroundColor = "#ffebee";
+	alertBox.style.color = "#d32f2f";
+	alertBox.style.padding = "10px";
+	alertBox.style.margin = "10px 0";
+	alertBox.style.borderRadius = "4px";
+	alertBox.style.fontWeight = "bold";
+}
+
+// Update the checkForFalling function
 function checkForFalling(pose, timestamp) {
-	if (!lastPose || !lastTimestamp || !pose || !pose.keypoints) return;
+	if (!lastPose || !lastTimestamp || !pose) return;
 
-	// Get nose and hip keypoints
-	const nose = pose.keypoints[0];
-	const leftHip = pose.keypoints[11];
-	const rightHip = pose.keypoints[12];
-	const lastNose = lastPose.keypoints[0];
+	const keypoints = pose.keypoints || [];
+	const lastKeypoints = lastPose.keypoints || [];
 
-	// Validate keypoints
-	if (
-		!nose ||
-		!leftHip ||
-		!rightHip ||
-		!lastNose ||
-		typeof nose.x !== "number" ||
-		typeof nose.y !== "number" ||
-		typeof leftHip.x !== "number" ||
-		typeof leftHip.y !== "number" ||
-		typeof rightHip.x !== "number" ||
-		typeof rightHip.y !== "number" ||
-		typeof lastNose.x !== "number" ||
-		typeof lastNose.y !== "number"
-	) {
-		return;
-	}
+	const nose = keypoints[0];
+	const leftHip = keypoints[11];
+	const rightHip = keypoints[12];
+	const lastNose = lastKeypoints[0];
 
-	// Calculate Y velocity (pixels/ms)
+	if (!nose || !leftHip || !rightHip || !lastNose) return;
+
 	const deltaTime = timestamp - lastTimestamp;
 	const velocityY = (nose.y - lastNose.y) / deltaTime;
-
-	// Calculate hip position (average of left and right hip)
 	const hipY = (leftHip.y + rightHip.y) / 2;
-	const lastHipY = (lastPose.keypoints[11].y + lastPose.keypoints[12].y) / 2;
+	const lastHipY = (lastKeypoints[11].y + lastKeypoints[12].y) / 2;
 	const hipVelocityY = (hipY - lastHipY) / deltaTime;
+
+	console.log("Fall detection values:", {
+		// Debug log
+		velocityY,
+		hipVelocityY,
+		noseY: nose.y,
+		hipY,
+		fallFrames,
+		timeSinceLastAlert: timestamp - lastAlertTime,
+	});
 
 	// Check for fall conditions
 	const isFalling =
 		velocityY < ANOMALY_THRESHOLDS.FALL_VELOCITY &&
 		hipVelocityY < ANOMALY_THRESHOLDS.FALL_VELOCITY &&
-		nose.y > hipY; // Nose should be below hips during a fall
+		nose.y > hipY;
 
 	if (isFalling) {
 		if (!fallStartTime) {
@@ -716,9 +719,9 @@ function checkForFalling(pose, timestamp) {
 		if (
 			fallFrames >= ANOMALY_THRESHOLDS.FALL_CONFIRMATION_FRAMES &&
 			timestamp - fallStartTime >= ANOMALY_THRESHOLDS.FALL_DURATION &&
-			timestamp - lastAlertTime >= ALERT_COOLDOWN
+			timestamp - lastAlertTime >= 5000
 		) {
-			alertBox.textContent = "⚠️ FALL DETECTED!";
+			showAlert("⚠️ FALL DETECTED!");
 			lastAlertTime = timestamp;
 		}
 	} else {
@@ -728,6 +731,7 @@ function checkForFalling(pose, timestamp) {
 	}
 }
 
+// Update the checkForFighting function
 function checkForFighting(poses) {
 	if (!poses || !Array.isArray(poses) || poses.length < 2) return;
 
@@ -743,6 +747,8 @@ function checkForFighting(poses) {
 		})
 		.filter((center) => center !== null);
 
+	console.log("Fight detection - Number of people:", centers.length); // Debug log
+
 	// Check pairwise distances
 	for (let i = 0; i < centers.length; i++) {
 		for (let j = i + 1; j < centers.length; j++) {
@@ -751,8 +757,10 @@ function checkForFighting(poses) {
 					Math.pow(centers[i].y - centers[j].y, 2)
 			);
 
+			console.log("Distance between people:", dist); // Debug log
+
 			if (dist < ANOMALY_THRESHOLDS.FIGHT_DISTANCE) {
-				alertBox.textContent = "⚠️ POTENTIAL FIGHT!";
+				showAlert("⚠️ POTENTIAL FIGHT!");
 			}
 		}
 	}

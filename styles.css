@@ -240,6 +240,10 @@ h2 {
 	margin-bottom: 15px;
 }
 
+.hidden {
+	display: none !important;
+}
+
 .camera-source label {
 	display: block;
 	margin-bottom: 5px;
