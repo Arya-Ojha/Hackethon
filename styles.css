@@ -1,0 +1,392 @@
+/* Dark mode variables */
+:root {
+	--bg-color: #f5f5f5;
+	--container-bg: white;
+	--text-color: #333;
+	--border-color: #ddd;
+	--shadow-color: rgba(0, 0, 0, 0.1);
+	--control-bg: #f8f9fa;
+	--status-bg: #e8f5e9;
+	--status-color: #2e7d32;
+	--alert-bg: #ffebee;
+	--alert-color: #d32f2f;
+	--button-hover: #45a049;
+	--button-stop: #f44336;
+	--button-stop-hover: #da190b;
+}
+
+/* Dark mode theme */
+[data-theme="dark"] {
+	--bg-color: #1a1a1a;
+	--container-bg: #2d2d2d;
+	--text-color: #ffffff;
+	--border-color: #404040;
+	--shadow-color: rgba(0, 0, 0, 0.3);
+	--control-bg: #333333;
+	--status-bg: #1b5e20;
+	--status-color: #81c784;
+	--alert-bg: #b71c1c;
+	--alert-color: #ffcdd2;
+	--button-hover: #388e3c;
+	--button-stop: #d32f2f;
+	--button-stop-hover: #b71c1c;
+}
+
+body {
+	font-family: "Segoe UI", Arial, sans-serif;
+	text-align: center;
+	background-color: var(--bg-color);
+	margin: 0;
+	padding: 20px;
+	color: var(--text-color);
+	transition: background-color 0.3s ease;
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+	background-color: var(--container-bg);
+	border-radius: 10px;
+	box-shadow: 0 2px 10px var(--shadow-color);
+	transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 30px;
+}
+
+.dark-mode-toggle {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 10px;
+	font-size: 1.5em;
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+	background-color: var(--control-bg);
+}
+
+.dark-mode-toggle .sun {
+	display: none;
+}
+
+[data-theme="dark"] .dark-mode-toggle .sun {
+	display: inline;
+}
+
+[data-theme="dark"] .dark-mode-toggle .moon {
+	display: none;
+}
+
+h1 {
+	color: var(--text-color);
+	margin: 0;
+	font-size: 2em;
+	transition: color 0.3s ease;
+}
+
+h2 {
+	color: #333;
+	margin: 20px 0;
+	font-size: 1.5em;
+}
+
+.video-container {
+	position: relative;
+	display: inline-block;
+	margin-bottom: 20px;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	background-color: #000;
+}
+
+#video {
+	transform: scaleX(-1);
+	width: 640px;
+	height: 480px;
+	border-radius: 8px;
+	background-color: #000;
+}
+
+#canvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 8px;
+}
+
+.controls {
+	margin: 20px 0;
+	display: flex;
+	gap: 10px;
+	justify-content: center;
+}
+
+.btn {
+	padding: 12px 24px;
+	font-size: 16px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	font-weight: bold;
+}
+
+.btn-start {
+	background-color: #4caf50;
+	color: white;
+}
+
+.btn-stop {
+	background-color: #f44336;
+	color: white;
+}
+
+.btn:hover {
+	opacity: 0.9;
+	transform: translateY(-2px);
+}
+
+.btn:disabled {
+	background-color: #cccccc;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.alert {
+	color: var(--alert-color);
+	font-size: 1.1em;
+	font-weight: bold;
+	padding: 15px;
+	margin: 20px 0;
+	border-radius: 5px;
+	background-color: var(--alert-bg);
+	border: 1px solid var(--border-color);
+	display: none;
+	transition: background-color 0.3s ease, color 0.3s ease,
+		border-color 0.3s ease;
+}
+
+.status {
+	margin: 10px 0;
+	padding: 12px;
+	border-radius: 5px;
+	background-color: var(--status-bg);
+	color: var(--status-color);
+	font-weight: 500;
+	border: 1px solid var(--border-color);
+	transition: background-color 0.3s ease, color 0.3s ease,
+		border-color 0.3s ease;
+}
+
+.detection-info {
+	margin-top: 20px;
+	padding: 20px;
+	background-color: var(--control-bg);
+	border-radius: 8px;
+	text-align: left;
+	border: 1px solid var(--border-color);
+	transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.detection-info h2 {
+	margin-top: 0;
+	color: var(--text-color);
+	font-size: 1.3em;
+	transition: color 0.3s ease;
+}
+
+.detection-info ul {
+	margin: 10px 0;
+	padding-left: 20px;
+}
+
+.detection-info li {
+	margin: 8px 0;
+	color: var(--text-color);
+	transition: color 0.3s ease;
+}
+
+.camera-controls {
+	background: var(--control-bg);
+	padding: 20px;
+	border-radius: 8px;
+	margin-bottom: 20px;
+	box-shadow: 0 2px 5px var(--shadow-color);
+	border: 1px solid var(--border-color);
+	transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.camera-controls h2 {
+	margin-top: 0;
+	color: #333;
+	font-size: 1.2em;
+}
+
+.camera-source {
+	margin-bottom: 15px;
+}
+
+.camera-source label {
+	display: block;
+	margin-bottom: 5px;
+	color: #666;
+	font-weight: 500;
+}
+
+.camera-source select {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	background: var(--container-bg);
+	font-size: 1em;
+	color: var(--text-color);
+	transition: background-color 0.3s ease, border-color 0.3s ease,
+		color 0.3s ease;
+}
+
+.instructions {
+	margin-bottom: 20px;
+	padding: 15px;
+	background: #e3f2fd;
+	border-radius: 4px;
+	text-align: left;
+	border: 1px solid #bbdefb;
+}
+
+.instructions h3 {
+	margin-top: 0;
+	color: #1976d2;
+	font-size: 1.1em;
+}
+
+.instructions ol {
+	margin: 10px 0;
+	padding-left: 20px;
+}
+
+.instructions li {
+	margin: 5px 0;
+	color: #333;
+}
+
+.url-input {
+	margin: 15px 0;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.url-input label {
+	min-width: 100px;
+	color: #666;
+	font-weight: 500;
+}
+
+.url-input input {
+	flex: 1;
+	padding: 10px;
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	font-size: 1em;
+	background: var(--container-bg);
+	color: var(--text-color);
+	transition: background-color 0.3s ease, border-color 0.3s ease,
+		color 0.3s ease;
+}
+
+.url-input button {
+	padding: 10px 20px;
+	background: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	white-space: nowrap;
+	font-weight: 500;
+	transition: background-color 0.3s;
+}
+
+.url-input button:hover {
+	background: #45a049;
+}
+
+.url-help {
+	margin-top: 10px;
+	padding: 10px;
+	background: #f8f9fa;
+	border-radius: 4px;
+	font-size: 0.9em;
+	color: #666;
+	border: 1px solid #e9ecef;
+}
+
+.url-help p {
+	margin: 5px 0;
+}
+
+#ipWebcamSettings {
+	margin: 15px 0;
+	padding: 20px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.buttons {
+	display: flex;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.buttons button {
+	flex: 1;
+	padding: 12px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: bold;
+	font-size: 1em;
+	transition: all 0.3s ease;
+}
+
+#startBtn {
+	background: #4caf50;
+	color: white;
+}
+
+#startBtn:hover {
+	background: #45a049;
+	transform: translateY(-1px);
+}
+
+#stopBtn {
+	background: #f44336;
+	color: white;
+}
+
+#stopBtn:hover {
+	background: #da190b;
+	transform: translateY(-1px);
+}
+
+#stopBtn:disabled {
+	background: #cccccc;
+	cursor: not-allowed;
+	transform: none;
+}

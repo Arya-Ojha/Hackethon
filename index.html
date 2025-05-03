@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pose and Object Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.1.3/dist/pose-detection.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <script>
+        // Disable source map warnings
+        window.addEventListener('error', function (e) {
+            if (e.message.includes('source-map') || e.message.includes('SourceMap')) {
+                e.preventDefault();
+                return true;
+            }
+        }, true);
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Pose and Object Detection</h1>
+            <button id="darkModeToggle" class="dark-mode-toggle">
+                <span class="moon">🌙</span>
+                <span class="sun">☀️</span>
+            </button>
+        </div>
+
+        <div class="video-container">
+            <video id="video" playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="camera-controls">
+                <h2>Camera Controls</h2>
+                <div class="camera-source">
+                    <label>Camera Source:</label>
+                    <select id="cameraSource" onchange="setCameraSource(this.value)">
+                        <option value="webcam">Local Webcam</option>
+                        <option value="droidcam">DroidCam</option>
+                    </select>
+                </div>
+                <div id="droidcamSettings" style="display: none;">
+                    <div class="instructions">
+                        <h3>DroidCam Setup Instructions:</h3>
+                        <ol>
+                            <li>Install "DroidCam" from Play Store</li>
+                            <li>Install DroidCam client on your computer</li>
+                            <li>Make sure your phone and computer are on the same WiFi</li>
+                            <li>Open DroidCam on your phone and connect</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button id="startBtn">Start Camera</button>
+                    <button id="stopBtn" disabled>Stop Camera</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="status" class="status">Ready to start</div>
+        <div id="alert" class="alert" style="display: none;"></div>
+
+        <div class="detection-info">
+            <h2>Detection Information</h2>
+            <p>This application can detect:</p>
+            <ul>
+                <li>Human poses and movements</li>
+                <li>Falling incidents</li>
+                <li>Potential fighting situations</li>
+                <li>Common objects in the scene</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
